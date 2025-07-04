@@ -1,0 +1,150 @@
+-- 1. Create table 'student' without NOT NULL
+CREATE TABLE student (
+    id INT,
+    name NVARCHAR(100),
+    age INT
+);
+
+-- 2. Now make 'id' column NOT NULL using ALTER
+ALTER TABLE student
+ALTER COLUMN id INT NOT NULL;
+
+-- 1. Create table 'product' with UNIQUE constraint on product_id
+CREATE TABLE product (
+    product_id INT CONSTRAINT UQ_product_id UNIQUE,
+    product_name NVARCHAR(100),
+    price DECIMAL(10,2)
+);
+
+-- 2. Drop UNIQUE constraint
+ALTER TABLE product DROP CONSTRAINT UQ_product_id;
+
+-- 3. Add UNIQUE constraint on combination of product_id and product_name
+ALTER TABLE product
+ADD CONSTRAINT UQ_product_id_name UNIQUE (product_id, product_name);
+-- 1. Create 'orders' table with PRIMARY KEY
+CREATE TABLE orders (
+    order_id INT CONSTRAINT PK_orders PRIMARY KEY,
+    customer_name NVARCHAR(100),
+    order_date DATE
+);
+
+-- 2. Drop the primary key constraint
+ALTER TABLE orders DROP CONSTRAINT PK_orders;
+
+-- 3. Re-add primary key
+ALTER TABLE orders
+ADD CONSTRAINT PK_orders PRIMARY KEY (order_id);
+-- 1. Create 'category' table
+CREATE TABLE category (
+    category_id INT CONSTRAINT PK_category PRIMARY KEY,
+    category_name NVARCHAR(100)
+);
+
+-- 2. Create 'item' table with foreign key
+CREATE TABLE item (
+    item_id INT CONSTRAINT PK_item PRIMARY KEY,
+    item_name NVARCHAR(100),
+    category_id INT,
+    CONSTRAINT FK_item_category FOREIGN KEY (category_id) REFERENCES category(category_id)
+);
+
+-- 3. Drop the foreign key
+ALTER TABLE item DROP CONSTRAINT FK_item_category;
+
+-- 4. Re-add foreign key
+ALTER TABLE item
+ADD CONSTRAINT FK_item_category FOREIGN KEY (category_id) REFERENCES category(category_id);
+-- 1. Create 'account' table with CHECK constraints
+CREATE TABLE account (
+    account_id INT CONSTRAINT PK_account PRIMARY KEY,
+    balance DECIMAL(10,2) CONSTRAINT CK_balance CHECK (balance >= 0),
+    account_type NVARCHAR(50) CONSTRAINT CK_account_type CHECK (account_type IN ('Saving', 'Checking'))
+);
+
+-- 2. Drop the CHECK constraints
+ALTER TABLE account DROP CONSTRAINT CK_balance;
+ALTER TABLE account DROP CONSTRAINT CK_account_type;
+
+-- 3. Re-add the CHECK constraints
+ALTER TABLE account
+ADD CONSTRAINT CK_balance CHECK (balance >= 0),
+    CONSTRAINT CK_account_type CHECK (account_type IN ('Saving', 'Checking'));
+-- 1. Create 'customer' table with DEFAULT value for city
+CREATE TABLE customer (
+    customer_id INT CONSTRAINT PK_customer PRIMARY KEY,
+    name NVARCHAR(100),
+    city NVARCHAR(100) CONSTRAINT DF_city DEFAULT 'Unknown'
+);
+
+-- 2. Drop the DEFAULT constraint
+ALTER TABLE customer DROP CONSTRAINT DF_city;
+
+-- 3. Re-add the DEFAULT constraint
+ALTER TABLE customer
+ADD CONSTRAINT DF_city DEFAULT 'Unknown' FOR city;
+-- 1. Create 'invoice' table with IDENTITY (auto-increment)
+CREATE TABLE invoice (
+    invoice_id INT IDENTITY(1,1) CONSTRAINT PK_invoice PRIMARY KEY,
+    amount DECIMAL(10,2)
+);
+
+-- 2. Insert 5 rows without specifying invoice_id
+INSERT INTO invoice (amount) VALUES (100), (200), (300), (400), (500);
+
+-- 3. Insert manually with specific invoice_id using IDENTITY_INSERT
+SET IDENTITY_INSERT invoice ON;
+INSERT INTO invoice (invoice_id, amount) VALUES (100, 999);
+SET IDENTITY_INSERT invoice OFF;
+CREATE TABLE books (
+    book_id INT IDENTITY(1,1) CONSTRAINT PK_books PRIMARY KEY,
+    title NVARCHAR(200) NOT NULL,
+    price DECIMAL(10,2) CONSTRAINT CK_price CHECK (price > 0),
+    genre NVARCHAR(100) CONSTRAINT DF_genre DEFAULT 'Unknown'
+);
+
+-- Insert valid data
+INSERT INTO books (title, price) VALUES ('Python 101', 50), ('Data Science', 100);
+
+-- Try inserting invalid data to see constraints work
+-- INSERT INTO books (title, price) VALUES (NULL, 20); -- will fail (NOT NULL)
+-- INSERT INTO books (title, price) VALUES ('Bad Book', -10); -- will fail (CHECK)
+-- 1. Create 'Book' table
+CREATE TABLE Book (
+    book_id INT IDENTITY(1,1) CONSTRAINT PK_Book PRIMARY KEY,
+    title NVARCHAR(200),
+    author NVARCHAR(100),
+    published_year INT
+);
+
+-- 2. Create 'Member' table
+CREATE TABLE Member (
+    member_id INT IDENTITY(1,1) CONSTRAINT PK_Member PRIMARY KEY,
+    name NVARCHAR(100),
+    email NVARCHAR(100),
+    phone_number NVARCHAR(50)
+);
+
+-- 3. Create 'Loan' table with foreign keys to Book and Member
+CREATE TABLE Loan (
+    loan_id INT IDENTITY(1,1) CONSTRAINT PK_Loan PRIMARY KEY,
+    book_id INT,
+    member_id INT,
+    loan_date DATE,
+    return_date DATE,
+    CONSTRAINT FK_Loan_Book FOREIGN KEY (book_id) REFERENCES Book(book_id),
+    CONSTRAINT FK_Loan_Member FOREIGN KEY (member_id) REFERENCES Member(member_id)
+);
+
+-- Insert sample data
+INSERT INTO Book (title, author, published_year) VALUES
+('Learn SQL', 'Alice', 2020),
+('Data Analysis', 'Bob', 2019);
+
+INSERT INTO Member (name, email, phone_number) VALUES
+('John Doe', 'john@example.com', '123456789'),
+('Jane Smith', 'jane@example.com', '987654321');
+
+INSERT INTO Loan (book_id, member_id, loan_date) VALUES
+(1, 1, GETDATE()),
+(2, 2, GETDATE());
