@@ -1,13 +1,22 @@
--- 1. Create 'invoice' table with IDENTITY (auto-increment)
-CREATE TABLE invoice (
-    invoice_id INT IDENTITY(1,1) CONSTRAINT PK_invoice PRIMARY KEY,
-    amount DECIMAL(10,2)
-);
+create table invoice(
+	invoice_id int identity,
+	amount decimal(10,2)
+)
 
--- 2. Insert 5 rows without specifying invoice_id
-INSERT INTO invoice (amount) VALUES (100), (200), (300), (400), (500);
+-- insert 5 rows without invoice_id
+insert into invoice
+select 321.87
+union all
+select 23.56
+union all
+select 345.67
+union all
+select 434.54
 
--- 3. Insert manually with specific invoice_id using IDENTITY_INSERT
-SET IDENTITY_INSERT invoice ON;
-INSERT INTO invoice (invoice_id, amount) VALUES (100, 999);
-SET IDENTITY_INSERT invoice OFF;
+-- enable indentity_insert to manually insert a row
+set identity_insert invoice on
+
+insert into invoice(invoice_id, amount)
+select 100, null
+
+select * from invoice
